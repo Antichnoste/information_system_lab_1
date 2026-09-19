@@ -46,9 +46,6 @@ Thumbs.db
 docker-compose.override.yml
 compose.override.yaml
 
-# Python cache
-__pycache__/
-*.py[cod]
 
 # Frontend dependencies and generated output
 frontend/node_modules/
@@ -57,11 +54,7 @@ frontend/test-results/
 frontend/playwright-report/
 
 frontend/*.tsbuildinfo
-tests/__pycache__/
 
-tests/
 src/test
 
-PLAN.md
-TASK.md
-README_full.md
+план.txt

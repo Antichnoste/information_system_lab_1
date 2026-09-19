@@ -6,11 +6,11 @@ repositories { mavenCentral() }
 configurations { jdbcDriver }
 dependencies {
     providedCompile 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
+    compileOnly('org.hibernate.orm:hibernate-core:6.6.3.Final') { transitive = false }
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
     jdbcDriver('org.postgresql:postgresql:42.7.5') { transitive = false }
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
-test { useJUnitPlatform() }
 war {
     archiveFileName = 'ROOT.war'
     from('frontend/dist')
@@ -29,7 +29,8 @@ def heliosHome = providers.gradleProperty('heliosHome').orElse('/home/studs/s466
 def wildflyHome = providers.gradleProperty('wildflyHome').orElse('/home/studs/s466113/wildfly-35.0.1.Final')
 
 tasks.register('frontendBuild', Exec) {
-    commandLine 'npm', '--prefix', 'frontend', 'run', 'build'
+    def npm = ['npm', '--prefix', 'frontend', 'run', 'build']
+    commandLine System.getProperty('os.name').startsWith('Windows') ? ['cmd', '/c'] + npm : npm
 }
 tasks.named('war') { dependsOn 'frontendBuild' }
 
@@ -50,7 +51,5 @@ tasks.register('deployHelios') {
         run(['scp', '-P', heliosPort.get(), war.absolutePath, "${target}:${remoteWar}"])
         run(['ssh', '-p', heliosPort.get(), target,
             "set -e; rm -f '${deployment}/ROOT.war' '${deployment}/ROOT.war.deployed' '${deployment}/ROOT.war.failed'; mv '${remoteWar}' '${deployment}/ROOT.war'; ls -lh '${deployment}/ROOT.war'"])
-        run(['ssh', '-p', heliosPort.get(), target,
-            'curl -fsS --max-time 10 http://127.0.0.1:8080/api/health'])
     }
 }

@@ -7,7 +7,7 @@ export function Dialog({title,children,onClose,wide=false}:{title:string;childre
 }
 export function ErrorBox({error}:{error:unknown}){
  if(!error)return null;
- return <div className="error" role="alert">{error instanceof Error?error.message:'Не удалось загрузить данные'}{error instanceof ApiError && error.status===409?<small>Закройте форму и откройте её снова, чтобы получить актуальные данные.</small>:null}</div>;
+ return <div className="error" role="alert">{error instanceof Error?error.message:'Не удалось загрузить данные'}</div>;
 }
 export function Field({label,name,error,children}:{label:string;name:string;error?:unknown;children:ReactNode}){
  const message=error instanceof ApiError?error.fields[name]:undefined;

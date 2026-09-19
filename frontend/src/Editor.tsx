@@ -42,7 +42,6 @@ export default function Editor({kind,entity,onClose,onSaved}:{kind:Kind;entity?:
     if(!Number.isFinite(y)||y<=-629)throw new ApiError(400,'Проверьте координату Y',{y:'Значение должно быть больше −629'});
     body={x:longValue(value('x'),'x'),y};
    }
-   if(entity)body.version=entity.version;
    const saved=await api<Entity>('/'+kind+(entity?'/'+entity.id:''),entity?'PUT':'POST',body);
    await refresh();onSaved?.(saved);onClose();
   }catch(e){setError(e)}finally{setSaving(false)}

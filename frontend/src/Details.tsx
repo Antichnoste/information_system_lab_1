@@ -8,7 +8,7 @@ export default function Details({kind,entity:initialEntity,onClose,onEdit}:{kind
  if(query.isPending)return <Dialog title="Загрузка карточки" onClose={onClose}><Loading/></Dialog>;
  if(query.isError)return <Dialog title="Объект недоступен" onClose={onClose}><ErrorBox error={query.error}/></Dialog>;
  const entity=query.data;
- let rows:[string,unknown][]=[['ID',entity.id],['Версия',entity.version]];
+ let rows:[string,unknown][]=[['ID',entity.id]];
  if(kind==='humans'){
   const h=entity as Human;
   rows.push(['Имя',h.name],['Дата создания',new Date(h.creationDate).toLocaleString('ru-RU')],['Координаты',`#${h.coordinates.id} · (${h.coordinates.x}; ${h.coordinates.y})`],

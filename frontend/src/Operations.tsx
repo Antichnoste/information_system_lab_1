@@ -1,0 +1,24 @@
+import {useState} from 'react';
+import {useQuery} from '@tanstack/react-query';
+import {api,refresh} from './api';
+import {Dialog,Empty,ErrorBox,Loading} from './components';
+import {type Human,weapons} from './types';
+import {type OpenEntity} from './Catalog';
+export default function Operations({open}:{open:OpenEntity}){
+ const [weapon,setWeapon]=useState('HAMMER');const [substring,setSubstring]=useState('');
+ const [search,setSearch]=useState<{path:string;label:string}|null>(null);
+ const [pending,setPending]=useState<{path:string;method:string;label:string}|null>(null);
+ const [busy,setBusy]=useState(false);const [error,setError]=useState<unknown>();const [notice,setNotice]=useState('');
+ const results=useQuery({queryKey:['operations',search?.path],queryFn:()=>api<Human|Human[]|null>(search!.path),enabled:!!search});
+ const humans=Array.isArray(results.data)?results.data:results.data?[results.data]:[];
+ async function execute(){if(!pending)return;setBusy(true);setError(undefined);try{const result=await api<{count:number;id:number|null}>(pending.path,pending.method);setNotice(`${pending.label}. Затронуто объектов: ${result.count}${result.id?' · ID '+result.id:''}`);await refresh();setPending(null)}catch(e){setError(e)}finally{setBusy(false)}}
+ return <><div className="operations-grid">
+  <article className="operation-card"><span className="operation-number">01 / УДАЛЕНИЕ</span><h2>По типу оружия</h2><p>Удалить одного персонажа с выбранным оружием.</p><label className="field"><span>Тип оружия</span><select value={weapon} onChange={e=>setWeapon(e.target.value)}>{Object.entries(weapons).map(([v,t])=><option key={v} value={v}>{t}</option>)}</select></label><button className="secondary" onClick={()=>{setError(undefined);setPending({path:'/operations/by-weapon?weaponType='+weapon,method:'DELETE',label:'Удаление по оружию'})}}>Удалить одного →</button></article>
+  <article className="operation-card"><span className="operation-number">02 / ПОИСК</span><h2>Минимум ожидания</h2><p>Найти персонажа с наименьшим указанным временем ожидания.</p><button className="secondary" onClick={()=>setSearch({path:'/operations/minimum-waiting',label:'Минимальное время ожидания'})}>Найти персонажа →</button></article>
+  <article className="operation-card"><span className="operation-number">03 / ПОИСК</span><h2>По саундтреку</h2><p>Найти всех, чей саундтрек содержит указанную подстроку.</p><form onSubmit={e=>{e.preventDefault();setSearch({path:'/operations/soundtrack?substring='+encodeURIComponent(substring),label:'Поиск по саундтреку'})}}><label className="field"><span>Подстрока саундтрека</span><input value={substring} onChange={e=>setSubstring(e.target.value)} placeholder="Например, night"/></label><button className="secondary">Найти совпадения →</button></form></article>
+  <article className="operation-card"><span className="operation-number">04 / НАСТРОЕНИЕ</span><h2>Время погрустить</h2><p>Установить всем настоящим героям настроение «Печаль».</p><button className="secondary" onClick={()=>{setError(undefined);setPending({path:'/operations/sadden',method:'POST',label:'Настроение героев изменено'})}}>Изменить настроение →</button></article>
+  <article className="operation-card accent"><span className="operation-number">05 / АВТОМОБИЛИ</span><h2>Красная Lada Kalina</h2><p>Выдать автомобиль каждому настоящему герою, у которого ещё нет машины.</p><button onClick={()=>{setError(undefined);setPending({path:'/operations/give-cars',method:'POST',label:'Пересадка героев выполнена'})}}>Пересадить героев →</button></article>
+ </div>{notice&&<div className="notice" role="status">{notice}</div>}
+ {search&&<section className="panel results"><div className="table-tools"><h3>{search.label}</h3><button className="text-button" onClick={()=>results.refetch()}>Обновить</button></div><ErrorBox error={results.error}/>{results.isPending?<Loading/>:humans.length?<div className="result-list">{humans.map(h=><button className="result-item" key={h.id} onClick={()=>open('humans',h,'view')}><span className="avatar">{h.name.slice(0,1)}</span><span><strong>{h.name}</strong><small>#{h.id} · {h.soundtrackName || 'Без названия саундтрека'}</small></span><span className="muted">{h.minutesOfWaiting??'—'} мин →</span></button>)}</div>:!results.isError?<Empty title="Подходящих персонажей нет" text="Попробуйте другой запрос или добавьте данные."/>:null}</section>}
+ {pending&&<Dialog title="Подтвердите операцию" onClose={()=>setPending(null)}><p>{pending.method==='DELETE'?'Будет удалён один подходящий персонаж.':'Изменения затронут всех подходящих настоящих героев.'}</p><ErrorBox error={error}/><div className="dialog-actions"><button className="secondary" disabled={busy} onClick={()=>setPending(null)}>Отмена</button><button disabled={busy} onClick={execute}>{busy?'Выполняем…':'Выполнить'}</button></div></Dialog>}</>;
+}

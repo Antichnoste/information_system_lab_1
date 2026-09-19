@@ -1,0 +1,67 @@
+.gradle/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+**/bin/
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+.env
+.env.*
+!.env.example
+
+# Local runtime and tooling files
+*.log
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+
+# Docker local overrides
+docker-compose.override.yml
+compose.override.yaml
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Frontend dependencies and generated output
+frontend/node_modules/
+frontend/dist/
+frontend/test-results/
+frontend/playwright-report/
+
+frontend/*.tsbuildinfo
+tests/__pycache__/
+
+tests/
+src/test
+
+PLAN.md
+TASK.md
+README_full.md

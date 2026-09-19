@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence" version="3.0">
+  <persistence-unit name="humanity" transaction-type="JTA">
+    <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+    <jta-data-source>java:/jdbc/HumanityDS</jta-data-source>
+    <properties>
+      <property name="hibernate.hbm2ddl.auto" value="validate"/>
+      <property name="hibernate.jdbc.time_zone" value="UTC"/>
+      <property name="hibernate.jpa.compliance.query" value="false"/>
+    </properties>
+  </persistence-unit>
+</persistence>

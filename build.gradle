@@ -1,0 +1,56 @@
+plugins { id 'java'; id 'war' }
+group = 'org.example'
+version = '1.0.0'
+java { toolchain { languageVersion = JavaLanguageVersion.of(17) } }
+repositories { mavenCentral() }
+configurations { jdbcDriver }
+dependencies {
+    providedCompile 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
+    jdbcDriver('org.postgresql:postgresql:42.7.5') { transitive = false }
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+test { useJUnitPlatform() }
+war {
+    archiveFileName = 'ROOT.war'
+    from('frontend/dist')
+}
+tasks.register('copyJdbc', Copy) {
+    from configurations.jdbcDriver
+    into layout.buildDirectory.dir('drivers')
+    rename { 'postgresql.jar' }
+}
+tasks.named('assemble') { dependsOn 'copyJdbc' }
+
+def heliosUser = providers.gradleProperty('heliosUser').orElse('s466113')
+def heliosHost = providers.gradleProperty('heliosHost').orElse('se.ifmo.ru')
+def heliosPort = providers.gradleProperty('heliosPort').orElse('2222')
+def heliosHome = providers.gradleProperty('heliosHome').orElse('/home/studs/s466113')
+def wildflyHome = providers.gradleProperty('wildflyHome').orElse('/home/studs/s466113/wildfly-35.0.1.Final')
+
+tasks.register('frontendBuild', Exec) {
+    commandLine 'npm', '--prefix', 'frontend', 'run', 'build'
+}
+tasks.named('war') { dependsOn 'frontendBuild' }
+
+tasks.register('deployHelios') {
+    dependsOn 'assemble'
+    doLast {
+        def run = { List<String> command ->
+            def result = providers.exec { commandLine command }.result.get()
+            if (result.exitValue != 0) {
+                throw new GradleException("Command failed with exit code ${result.exitValue}: ${command.join(' ')}")
+            }
+        }
+        def target = "${heliosUser.get()}@${heliosHost.get()}"
+        def war = layout.buildDirectory.file('libs/ROOT.war').get().asFile
+        def remoteWar = "${heliosHome.get()}/ROOT.war.new"
+        def deployment = "${wildflyHome.get()}/standalone/deployments"
+
+        run(['scp', '-P', heliosPort.get(), war.absolutePath, "${target}:${remoteWar}"])
+        run(['ssh', '-p', heliosPort.get(), target,
+            "set -e; rm -f '${deployment}/ROOT.war' '${deployment}/ROOT.war.deployed' '${deployment}/ROOT.war.failed'; mv '${remoteWar}' '${deployment}/ROOT.war'; ls -lh '${deployment}/ROOT.war'"])
+        run(['ssh', '-p', heliosPort.get(), target,
+            'curl -fsS --max-time 10 http://127.0.0.1:8080/api/health'])
+    }
+}

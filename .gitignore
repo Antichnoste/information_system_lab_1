@@ -58,3 +58,4 @@ frontend/*.tsbuildinfo
 src/test
 
 план.txt
+*.md

@@ -1,23 +1,33 @@
 package org.example.lab_1.service;
+
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.WebApplicationException;
 import org.example.lab_1.dto.AuthRequest;
+import org.example.lab_1.model.AppUser;
+import org.example.lab_1.repository.AppUserRepository;
+import org.example.lab_1.security.Passwords;
 
 @ApplicationScoped
 public class AuthService {
-    public String authenticate(AuthRequest input) {
-        if (input == null) throw new BadRequestException("Укажите логин и пароль");
-        String users = System.getenv("APP_USERS");
-        if (users == null) users = "alice:alice-lab-2026,bob:bob-lab-2026";
+    @Inject
+    private AppUserRepository appUserRepository;
 
-        // Учебные учётные записи заданы как логин:пароль через запятую.
-        for (String entry : users.split(",")) {
-            String[] user = entry.split(":", 2);
-            if (user.length == 2 && user[0].equals(input.getUsername()) && user[1].equals(input.getPassword())) {
-                return input.getUsername();
-            }
+    public String authenticate(AuthRequest input) {
+        if (input == null || input.getUsername() == null || input.getPassword() == null) {
+            throw new BadRequestException("Укажите логин и пароль");
         }
-        throw new WebApplicationException("Неверный логин или пароль", 401);
+
+        AppUser user = appUserRepository.findByUsername(input.getUsername());
+        if (user == null) {
+            throw new WebApplicationException("Неверный логин или пароль", 401);
+        }
+
+        if (!Passwords.matches(input.getPassword(), user.getPasswordHash())) {
+            throw new WebApplicationException("Неверный логин или пароль", 401);
+        }
+
+        return user.getUsername();
     }
 }

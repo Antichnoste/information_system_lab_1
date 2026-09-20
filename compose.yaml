@@ -1,31 +1,25 @@
-name: humanbeing-lab
+name: lab-1
 services:
   postgres:
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: humanity
-      POSTGRES_USER: ${DB_USER:-humanity}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-humanity-local}
+      POSTGRES_USER: humanity
+      POSTGRES_PASSWORD: humanity-local
     ports:
-      - "127.0.0.1:${DB_PORT:-55432}:5432"
+      - "55432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d humanity"]
-      interval: 3s
-      timeout: 3s
-      retries: 20
   backend:
     build: .
     environment:
-      DB_URL: ${DB_URL:-jdbc:postgresql://postgres:5432/humanity}
-      DB_USER: ${DB_USER:-humanity}
-      DB_PASSWORD: ${DB_PASSWORD:-humanity-local}
-      APP_USERS: ${APP_USERS:-alice:alice-lab-2026,bob:bob-lab-2026}
+      DB_URL: jdbc:postgresql://postgres:5432/humanity
+      DB_USER: humanity
+      DB_PASSWORD: humanity-local
     depends_on:
       postgres:
         condition: service_healthy
     ports:
-      - "127.0.0.1:${APP_PORT:-8080}:8080"
+      - "8080:8080"
 volumes:
   pgdata:

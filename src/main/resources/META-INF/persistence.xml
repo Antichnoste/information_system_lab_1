@@ -2,9 +2,8 @@
 <persistence xmlns="https://jakarta.ee/xml/ns/persistence" version="3.0">
   <persistence-unit name="humanity" transaction-type="JTA">
     <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-    <jta-data-source>java:app/jdbc/bd</jta-data-source>
+    <jta-data-source>java:/jdbc/HumanityDS</jta-data-source>
     <properties>
-      <property name="wildfly.jpa.applicationdatasource" value="true"/>
       <property name="hibernate.hbm2ddl.auto" value="update"/>
       <property name="hibernate.jdbc.time_zone" value="UTC"/>
     </properties>

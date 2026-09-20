@@ -9,19 +9,14 @@ dependencies {
     compileOnly('org.hibernate.orm:hibernate-core:6.6.3.Final') { transitive = false }
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    implementation 'org.mindrot:jbcrypt:0.4'
     jdbcDriver('org.postgresql:postgresql:42.7.5') { transitive = false }
 }
+
 war {
     archiveFileName = 'ROOT.war'
     from('frontend/dist')
 }
-tasks.register('copyJdbc', Copy) {
-    from configurations.jdbcDriver
-    into layout.buildDirectory.dir('drivers')
-    rename { 'postgresql.jar' }
-}
-tasks.named('assemble') { dependsOn 'copyJdbc' }
-
 def heliosUser = providers.gradleProperty('heliosUser').orElse('s466113')
 def heliosHost = providers.gradleProperty('heliosHost').orElse('se.ifmo.ru')
 def heliosPort = providers.gradleProperty('heliosPort').orElse('2222')

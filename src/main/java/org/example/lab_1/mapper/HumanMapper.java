@@ -12,13 +12,19 @@ public class HumanMapper {
     CoordinatesMapper coordinatesMapper;
 
     public HumanResponse toResponse(HumanBeing human) {
-        // long передаём строкой, чтобы браузер не округлял большие целые числа.
         return new HumanResponse(
-                human.id, human.name, coordinatesMapper.toResponse(human.coordinates),
-                human.creationDate.toString(), human.realHero, human.hasToothpick,
-                carMapper.toResponse(human.car), human.mood,
-                Long.toString(human.impactSpeed), human.soundtrackName,
+                human.id,
+                human.name,
+                coordinatesMapper.toResponse(human.coordinates),
+                human.creationDate.toString(),
+                human.realHero,
+                human.hasToothpick,
+                carMapper.toResponse(human.car),
+                human.mood,
+                Long.toString(human.impactSpeed),
+                human.soundtrackName,
                 human.minutesOfWaiting == null ? null : human.minutesOfWaiting.toString(),
-                human.weaponType);
+                human.weaponType
+        );
     }
 }

@@ -59,6 +59,7 @@ public class HumanService {
         // Сначала фильтруем и сортируем весь список, затем выбираем нужную страницу.
         int from = (int) Math.min((long) page * size, humans.size());
         int to = Math.min(from + size, humans.size());
+        
         List<HumanResponse> result = new ArrayList<>();
         for (int i = from; i < to; i++) {
             result.add(mapper.toResponse(humans.get(i)));

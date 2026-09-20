@@ -20,9 +20,4 @@ public class AppUser {
 
     @Column(nullable = false)
     private String passwordHash;
-
-    public AppUser(String username, String passwordHash) {
-        this.username = username;
-        this.passwordHash = passwordHash;
-    }
 }

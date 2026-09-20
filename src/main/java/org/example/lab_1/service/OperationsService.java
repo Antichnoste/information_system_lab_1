@@ -26,7 +26,7 @@ public class OperationsService {
     @Inject
     HumanMapper mapper;
 
-    // 1. Удалить первого найденного персонажа с заданным оружием.
+    // Удалить первого найденного персонажа с заданным оружием.
     public OperationResponse deleteByWeapon(WeaponType weapon) {
         if (weapon == null) {
             throw new BadRequestException("Укажите тип оружия");
@@ -41,7 +41,7 @@ public class OperationsService {
         return new OperationResponse(0, null);
     }
 
-    // 2. Найти минимальное время ожидания, пропуская null.
+    // Найти минимальное время ожидания, пропуская null.
     public HumanResponse minimumWaiting() {
         HumanBeing minimum = null;
         for (HumanBeing human : humanRepository.findAll()) {
@@ -56,7 +56,7 @@ public class OperationsService {
         return minimum == null ? null : mapper.toResponse(minimum);
     }
 
-    // 3. Поиск обычной подстроки без SQL-шаблонов и без учёта регистра.
+    // Поиск обычной подстроки без SQL-шаблонов и без учёта регистра.
     public List<HumanResponse> soundtrack(String substring) {
         if (substring == null) {
             throw new BadRequestException("Укажите подстроку");
@@ -72,7 +72,7 @@ public class OperationsService {
         return result;
     }
 
-    // 4. Максимально печальное настроение только для realHero = true.
+    // Максимально печальное настроение только для realHero = true.
     public OperationResponse sadden() {
         int count = 0;
         for (HumanBeing human : humanRepository.findAll()) {
@@ -84,7 +84,7 @@ public class OperationsService {
         return new OperationResponse(count, null);
     }
 
-    // 5. Назначить одну общую красную Lada Kalina героям без машины.
+    // Назначить одну общую красную Lada Kalina героям без машины.
     public OperationResponse giveCars() {
         List<HumanBeing> humansWithoutCar = new ArrayList<>();
         for (HumanBeing human : humanRepository.findAll()) {

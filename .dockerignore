@@ -3,7 +3,3 @@
 build/*
 !build/libs/
 !build/libs/ROOT.war
-!build/drivers/
-!build/drivers/postgresql.jar
-!deploy/
-!deploy/configure.cli

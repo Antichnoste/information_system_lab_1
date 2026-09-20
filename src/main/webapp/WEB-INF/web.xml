@@ -1,4 +1,20 @@
 <web-app xmlns="https://jakarta.ee/xml/ns/jakartaee" version="6.0">
   <context-param><param-name>resteasy.preferJacksonOverJsonB</param-name><param-value>true</param-value></context-param>
   <session-config><session-timeout>30</session-timeout><cookie-config><http-only>true</http-only></cookie-config><tracking-mode>COOKIE</tracking-mode></session-config>
+  <data-source>
+    <name>java:app/jdbc/bd</name>
+    <class-name>org.postgresql.ds.PGSimpleDataSource</class-name>
+
+    <url>jdbc:postgresql://postgres:5432/bd</url>
+    <user>me</user>
+    <password>secret</password>
+
+    <!--<url>jdbc:postgresql://pg:5432/studs</url>
+    <user>s466113</user>
+    <password>2YX7EaUBiLX4BaCt</password>-->
+
+    <transactional>true</transactional>
+    <max-pool-size>20</max-pool-size>
+    <min-pool-size>2</min-pool-size>
+  </data-source>
 </web-app>

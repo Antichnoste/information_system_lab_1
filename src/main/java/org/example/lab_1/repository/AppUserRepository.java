@@ -24,11 +24,6 @@ public class AppUserRepository {
         }
     }
 
-    public long count() {
-        return em.createQuery("select count(u) from AppUser u", Long.class)
-                .getSingleResult();
-    }
-
     public void save(AppUser user) {
         em.persist(user);
     }

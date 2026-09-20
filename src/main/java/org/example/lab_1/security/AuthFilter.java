@@ -8,7 +8,7 @@ import jakarta.ws.rs.ext.Provider;
 import java.util.Map;
 import org.example.lab_1.exception.GlobalExceptionHandler;
 
-// Для всех запросов, кроме входа, проверяем наличие обычной HTTP-сессии.
+// Для всех запросов, кроме входа и регистрации, проверяем наличие обычной HTTP-сессии.
 @Provider
 public class AuthFilter implements ContainerRequestFilter {
     @Context
@@ -17,7 +17,9 @@ public class AuthFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext context) {
         String path = context.getUriInfo().getPath().replaceFirst("^/+", "");
-        if (path.equals("auth/login")) return;
+        if (path.equals("auth/login") || path.equals("auth/register")) {
+            return;
+        }
 
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("username") == null) {

@@ -32,10 +32,9 @@ public class HumanService {
         if (page < 0 || size < 1 || size > 100) {
             throw new BadRequestException("Номер страницы должен быть от 0, размер — от 1 до 100");
         }
-        for (String column : filters.keySet()) {
-            checkColumn(column, false);
+        if (sort == null || !List.of("id", "name", "soundtrackName", "carName", "carColor", "mood", "weaponType").contains(sort)) {
+            throw new BadRequestException("Недопустимое поле сортировки");
         }
-        checkColumn(sort, true);
 
         if (!"asc".equals(direction) && !"desc".equals(direction)) {
             throw new BadRequestException("Направление сортировки: asc или desc");
@@ -48,15 +47,8 @@ public class HumanService {
             }
         }
 
-        humans.sort((first, second) -> {
-            int result = "id".equals(sort)
-                    ? Integer.compare(first.id, second.id)
-                    : text(first, sort).compareToIgnoreCase(text(second, sort));
-            if ("desc".equals(direction)) result = -result;
-            return result == 0 ? Integer.compare(first.id, second.id) : result;
-        });
+        humans.sort((first, second) -> compareHumans(first, second, sort, direction));
 
-        // Сначала фильтруем и сортируем весь список, затем выбираем нужную страницу.
         int from = (int) Math.min((long) page * size, humans.size());
         int to = Math.min(from + size, humans.size());
         
@@ -67,26 +59,36 @@ public class HumanService {
         return new HumanPageResponse(result, humans.size(), page, size);
     }
 
+    private int compareHumans(HumanBeing first, HumanBeing second, String sort, String direction) {
+        int result;
+        if ("id".equals(sort)) {
+            result = Integer.compare(first.id, second.id);
+        } else {
+            result = text(first, sort).compareToIgnoreCase(text(second, sort));
+        }
+
+        if ("desc".equals(direction)) {
+            result = -result;
+        }
+
+        if (result == 0) {
+            return Integer.compare(first.id, second.id);
+        }
+        return result;
+    }
+
     private boolean matches(HumanBeing human, Map<String, String> filters) {
         for (var filter : filters.entrySet()) {
             String value = filter.getValue();
-            if (value == null || value.isEmpty()) continue;
+            if (value == null || value.isEmpty()) {
+                continue;
+            }
             String actual = text(human, filter.getKey()).toLowerCase(Locale.ROOT);
-            if (!actual.contains(value.toLowerCase(Locale.ROOT))) return false;
+            if (!actual.contains(value.toLowerCase(Locale.ROOT))) {
+                return false;
+            }
         }
         return true;
-    }
-
-    private void checkColumn(String column, boolean allowId) {
-        switch (column) {
-            case "name", "soundtrackName", "carName", "carColor", "mood", "weaponType":
-                return;
-            case "id":
-                if (allowId) {
-                    return;
-                }
-        }
-        throw new BadRequestException("Недопустимое поле поиска или сортировки");
     }
 
     private String text(HumanBeing human, String column) {
@@ -116,7 +118,6 @@ public class HumanService {
     public HumanResponse update(int id, HumanRequest input) {
         HumanBeing human = humanRepository.findById(id);
         fill(human, input);
-        // Hibernate сам сохранит изменения загруженного объекта при завершении транзакции.
         return mapper.toResponse(human);
     }
 

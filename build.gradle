@@ -13,9 +13,11 @@ dependencies {
     jdbcDriver('org.postgresql:postgresql:42.7.5') { transitive = false }
 }
 
+sourceSets.main.resources.exclude 'static/**'
+
 war {
     archiveFileName = 'ROOT.war'
-    from('frontend/dist')
+    from('src/main/resources/static')
 }
 def heliosUser = providers.gradleProperty('heliosUser').orElse('s466113')
 def heliosHost = providers.gradleProperty('heliosHost').orElse('se.ifmo.ru')
@@ -23,17 +25,19 @@ def heliosPort = providers.gradleProperty('heliosPort').orElse('2222')
 def heliosHome = providers.gradleProperty('heliosHome').orElse('/home/studs/s466113')
 def wildflyHome = providers.gradleProperty('wildflyHome').orElse('/home/studs/s466113/wildfly-35.0.1.Final')
 
-tasks.register('frontendBuild', Exec) {
-    def npm = ['npm', '--prefix', 'frontend', 'run', 'build']
-    commandLine System.getProperty('os.name').startsWith('Windows') ? ['cmd', '/c'] + npm : npm
-}
-tasks.named('war') { dependsOn 'frontendBuild' }
-
 tasks.register('deployHelios') {
     dependsOn 'assemble'
     doLast {
         def run = { List<String> command ->
-            def result = providers.exec { commandLine command }.result.get()
+            def execution = providers.exec {
+                commandLine command
+                ignoreExitValue = true
+            }
+            def result = execution.result.get()
+            def output = execution.standardOutput.asText.get()
+            def errors = execution.standardError.asText.get()
+            if (!output.isEmpty()) logger.lifecycle(output.stripTrailing())
+            if (!errors.isEmpty()) logger.error(errors.stripTrailing())
             if (result.exitValue != 0) {
                 throw new GradleException("Command failed with exit code ${result.exitValue}: ${command.join(' ')}")
             }
@@ -43,8 +47,12 @@ tasks.register('deployHelios') {
         def remoteWar = "${heliosHome.get()}/ROOT.war.new"
         def deployment = "${wildflyHome.get()}/standalone/deployments"
 
-        run(['scp', '-P', heliosPort.get(), war.absolutePath, "${target}:${remoteWar}"])
-        run(['ssh', '-p', heliosPort.get(), target,
-            "set -e; rm -f '${deployment}/ROOT.war' '${deployment}/ROOT.war.deployed' '${deployment}/ROOT.war.failed'; mv '${remoteWar}' '${deployment}/ROOT.war'; ls -lh '${deployment}/ROOT.war'"])
+        def connectionOptions = ['-o', 'ConnectTimeout=15', '-o', 'ConnectionAttempts=3',
+                                 '-o', 'ServerAliveInterval=15', '-o', 'ServerAliveCountMax=3']
+        logger.lifecycle('Загрузка WAR на Helios...')
+        run(['scp'] + connectionOptions + ['-P', heliosPort.get(), war.absolutePath, "${target}:${remoteWar}"])
+        logger.lifecycle('Установка WAR в WildFly...')
+        run(['ssh'] + connectionOptions + ['-p', heliosPort.get(), target,
+            "set -e; mv -f '${remoteWar}' '${deployment}/ROOT.war'; rm -f '${deployment}/ROOT.war.failed'; ls -lh '${deployment}/ROOT.war'"])
     }
 }

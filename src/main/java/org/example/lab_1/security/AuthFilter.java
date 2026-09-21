@@ -4,11 +4,9 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
-import java.util.Map;
-import org.example.lab_1.exception.GlobalExceptionHandler;
 
-// Для всех запросов, кроме входа и регистрации, проверяем наличие обычной HTTP-сессии.
 @Provider
 public class AuthFilter implements ContainerRequestFilter {
     @Context
@@ -23,7 +21,7 @@ public class AuthFilter implements ContainerRequestFilter {
 
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("username") == null) {
-            context.abortWith(GlobalExceptionHandler.response(401, "Войдите в систему", Map.of()));
+            context.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
         }
     }
 }

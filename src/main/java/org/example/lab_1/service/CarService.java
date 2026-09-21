@@ -53,7 +53,6 @@ public class CarService {
         return mapper.toResponse(car);
     }
 
-    // При удалении используемого автомобиля переносим персонажей на выбранную замену.
     public void delete(long id, Long replacementId) {
         Car car = carRepository.findById(id);
         if (replacementId != null && replacementId == id) {
@@ -72,7 +71,6 @@ public class CarService {
         for (HumanBeing human : humans) {
             human.car = replacement;
         }
-        carRepository.flush();
         carRepository.delete(car);
     }
 }

@@ -31,9 +31,4 @@ public class CoordinatesRepository {
     public void delete(Coordinates coordinates) {
         em.remove(coordinates);
     }
-
-    // Записать новые ссылки до удаления старого объекта, не завершая транзакцию.
-    public void flush() {
-        em.flush();
-    }
 }

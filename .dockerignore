@@ -1,5 +1,0 @@
-*
-!build/
-build/*
-!build/libs/
-!build/libs/ROOT.war

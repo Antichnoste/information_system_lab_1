@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HumanBeing — лабораторная № 1</title>
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body class="auth-page">
+    <header class="site-header">
+      <img src="assets/logo.svg" width="48" height="48" alt="" />
+      <div>
+        <h1>HumanBeing</h1>
+        <p>Лабораторная работа № 1. Учёт персонажей</p>
+      </div>
+    </header>
+    <noscript>Для работы с данными включите JavaScript в браузере.</noscript>
+    <section id="auth" aria-labelledby="auth-title">
+      <div class="auth-card">
+        <h2 id="auth-title">Вход и регистрация</h2>
+        <form id="auth-form">
+          <label>
+            Логин
+            <input name="username" required maxlength="255" autocomplete="username" />
+          </label>
+          <label>
+            Пароль
+            <input name="password" type="password" required autocomplete="current-password" />
+          </label>
+          <p id="auth-error" class="error" role="alert"></p>
+          <div class="auth-actions">
+            <button type="submit" name="action" value="login">Войти в систему</button>
+            <button type="submit" name="action" value="register" class="secondary">
+              Зарегистрироваться
+            </button>
+          </div>
+        </form>
+        <p class="hint">После регистрации вы сразу войдёте в систему.</p>
+      </div>
+    </section>
+    <div id="app" hidden>
+      <nav aria-label="Главное меню">
+        <a href="#humans">Персонажи</a>
+        <a href="#cars">Автомобили</a>
+        <a href="#coordinates">Координаты</a>
+        <a href="#operations">Специальные операции</a>
+      </nav>
+      <p>
+        Пользователь:
+        <b id="username"></b>
+        <button id="logout" type="button">Выйти</button>
+      </p>
+      <p id="message" role="status"></p>
+      <p id="sync-error" class="error" role="alert"></p>
+      <main>
+        <section id="humans" hidden>
+          <h2>Персонажи</h2>
+          <button type="button" data-create="humans">Добавить персонажа</button>
+          <form id="human-filters">
+            <fieldset>
+              <legend>Фильтры (по части строки)</legend>
+              <div class="toolbar">
+                <label>
+                  Имя
+                  <input name="name" />
+                </label>
+                <label>
+                  Саундтрек
+                  <input name="soundtrackName" />
+                </label>
+                <label>
+                  Автомобиль
+                  <input name="carName" />
+                </label>
+                <label>
+                  Цвет автомобиля
+                  <input name="carColor" />
+                </label>
+                <label>
+                  Настроение
+                  <input name="mood" placeholder="Например, SOR" />
+                </label>
+                <label>
+                  Оружие
+                  <input name="weaponType" placeholder="Например, HAM" />
+                </label>
+              </div>
+              <div class="toolbar">
+                <label>
+                  Сортировать по
+                  <select name="sort">
+                    <option value="id">ID</option>
+                    <option value="name">Имя</option>
+                    <option value="soundtrackName">Саундтрек</option>
+                    <option value="carName">Автомобиль</option>
+                    <option value="carColor">Цвет автомобиля</option>
+                    <option value="mood">Настроение</option>
+                    <option value="weaponType">Оружие</option>
+                  </select>
+                </label>
+                <label>
+                  Порядок
+                  <select name="direction">
+                    <option value="asc">По возрастанию</option>
+                    <option value="desc">По убыванию</option>
+                  </select>
+                </label>
+                <label>
+                  Строк на странице
+                  <select name="size">
+                    <option>10</option>
+                    <option>20</option>
+                    <option>50</option>
+                    <option>100</option>
+                  </select>
+                </label>
+                <button>Применить</button>
+                <button type="reset">Сбросить</button>
+              </div>
+            </fieldset>
+          </form>
+          <div id="humans-table" class="table-scroll"></div>
+          <p>
+            <button id="human-prev">Назад</button>
+            <span id="human-page"></span>
+            <button id="human-next">Вперёд</button>
+          </p>
+        </section>
+        <section id="cars" hidden>
+          <h2>Автомобили</h2>
+          <button type="button" data-create="cars">Добавить автомобиль</button>
+          <p>Один автомобиль может быть связан с несколькими персонажами.</p>
+          <div id="cars-table" class="table-scroll"></div>
+          <p id="cars-pager"></p>
+        </section>
+        <section id="coordinates" hidden>
+          <h2>Координаты</h2>
+          <button type="button" data-create="coordinates">Добавить координаты</button>
+          <p>Одни координаты могут быть связаны с несколькими персонажами.</p>
+          <div id="coordinates-table" class="table-scroll"></div>
+          <p id="coordinates-pager"></p>
+        </section>
+        <section id="operations" hidden>
+          <h2>Специальные операции</h2>
+          <form id="weapon-form">
+            <fieldset>
+              <legend>1. Удалить одного персонажа по оружию</legend>
+              <label>
+                Оружие
+                <select name="weaponType">
+                  <option>HAMMER</option>
+                  <option>PISTOL</option>
+                  <option>SHOTGUN</option>
+                  <option>RIFLE</option>
+                </select>
+              </label>
+              <button>Удалить одного</button>
+            </fieldset>
+          </form>
+          <fieldset>
+            <legend>2. Минимальное время ожидания</legend>
+            <p>Найти одного персонажа с наименьшим заполненным временем ожидания.</p>
+            <button id="minimum">Найти</button>
+          </fieldset>
+          <form id="soundtrack-form">
+            <fieldset>
+              <legend>3. Поиск по саундтреку</legend>
+              <label>
+                Часть названия
+                <input name="substring" />
+              </label>
+              <button>Найти по саундтреку</button>
+            </fieldset>
+          </form>
+          <fieldset>
+            <legend>4. Сделать героев печальными</legend>
+            <p>Установить SORROW всем персонажам, у которых «Настоящий герой» = «Да».</p>
+            <button data-operation="sadden">Установить SORROW</button>
+          </fieldset>
+          <fieldset>
+            <legend>5. Выдать автомобили</legend>
+            <p>Посадить настоящих героев без автомобиля в красные Lada Kalina.</p>
+            <button data-operation="give-cars">Выдать Lada Kalina</button>
+          </fieldset>
+          <p id="operation-message" role="status"></p>
+          <div id="operation-results" hidden>
+            <h3 id="result-title"></h3>
+            <div id="results-table" class="table-scroll"></div>
+            <p id="results-pager"></p>
+          </div>
+        </section>
+        <form id="lookup" class="toolbar">
+          <label>
+            Найти по ID
+            <select name="kind">
+              <option value="humans">Персонажа</option>
+              <option value="cars">Автомобиль</option>
+              <option value="coordinates">Координаты</option>
+            </select>
+          </label>
+          <label>
+            ID
+            <input
+              name="id"
+              required
+              inputmode="numeric"
+              pattern="[0-9]+"
+              aria-label="ID объекта"
+            />
+          </label>
+          <button>Открыть</button>
+        </form>
+      </main>
+    </div>
+
+    <dialog id="human-dialog" aria-labelledby="human-title">
+      <h2 id="human-title"></h2>
+      <form id="human-form">
+        <p class="hint">ID и дата создания назначаются автоматически. * — обязательное поле.</p>
+        <label>
+          Имя *
+          <input name="name" required maxlength="255" />
+        </label>
+        <label>
+          Координаты *
+          <select name="coordinatesId" required></select>
+        </label>
+        <button type="button" data-create="coordinates">Создать координаты</button>
+        <label>
+          Настоящий герой *
+          <select name="realHero" required>
+            <option value="false">Нет</option>
+            <option value="true">Да</option>
+          </select>
+        </label>
+        <label>
+          <input name="hasToothpick" type="checkbox" />
+          Есть зубочистка
+        </label>
+        <label>
+          Автомобиль
+          <select name="carId"></select>
+        </label>
+        <button type="button" data-create="cars">Создать автомобиль</button>
+        <label>
+          Настроение
+          <select name="mood">
+            <option value="">Не указано</option>
+            <option>SORROW</option>
+            <option>LONGING</option>
+            <option>RAGE</option>
+            <option>FRENZY</option>
+          </select>
+        </label>
+        <label>
+          Скорость удара *
+          <input name="impactSpeed" value="0" required inputmode="text" data-long />
+        </label>
+        <label>
+          Саундтрек *
+          <input name="soundtrackName" maxlength="255" />
+        </label>
+        <p class="hint">Саундтрек может быть пустой строкой. Время ожидания можно не указывать.</p>
+        <label>
+          Время ожидания (минуты)
+          <input name="minutesOfWaiting" inputmode="text" data-long />
+        </label>
+        <label>
+          Оружие *
+          <select name="weaponType" required>
+            <option>HAMMER</option>
+            <option>PISTOL</option>
+            <option>SHOTGUN</option>
+            <option>RIFLE</option>
+          </select>
+        </label>
+        <p class="error" role="alert"></p>
+        <button type="submit">Сохранить</button>
+        <button type="button" data-close>Отмена</button>
+      </form>
+    </dialog>
+
+    <dialog id="reference-dialog" aria-labelledby="reference-title">
+      <h2 id="reference-title"></h2>
+      <form id="reference-form">
+        <fieldset id="car-fields">
+          <legend>Автомобиль</legend>
+          <label>
+            Название
+            <input name="name" maxlength="255" />
+          </label>
+          <label>
+            Цвет
+            <input name="color" maxlength="255" placeholder="Например, RED" />
+          </label>
+          <label>
+            <input name="cool" type="checkbox" />
+            Крутой автомобиль
+          </label>
+          <p class="hint">Пустые название и цвет сохраняются как «не указано».</p>
+        </fieldset>
+        <fieldset id="coordinate-fields">
+          <legend>Координаты</legend>
+          <label>
+            X * (целое число)
+            <input name="x" required data-long inputmode="text" />
+          </label>
+          <label>
+            Y * (больше −629)
+            <input name="y" type="number" step="any" required />
+          </label>
+        </fieldset>
+        <p class="error" role="alert"></p>
+        <button type="submit">Сохранить</button>
+        <button type="button" data-close>Отмена</button>
+      </form>
+    </dialog>
+
+    <dialog id="details-dialog" aria-labelledby="details-title">
+      <h2 id="details-title">Информация об объекте</h2>
+      <div id="details-content"></div>
+      <p class="error" role="alert"></p>
+      <button id="details-edit">Изменить</button>
+      <button type="button" data-close>Закрыть</button>
+    </dialog>
+
+    <dialog id="delete-dialog" aria-labelledby="delete-title">
+      <h2 id="delete-title">Удаление</h2>
+      <form id="delete-form">
+        <p id="delete-description"></p>
+        <div id="replacement-fields">
+          <label>
+            Перенести связанные объекты на
+            <select name="replacementId"></select>
+          </label>
+          <p class="hint">
+            Если объект используется, нужно выбрать замену. Если замен нет, сначала создайте новый
+            объект в соответствующем разделе.
+          </p>
+        </div>
+        <p class="error" role="alert"></p>
+        <button type="submit">Удалить</button>
+        <button type="button" data-close>Отмена</button>
+      </form>
+    </dialog>
+  </body>
+</html>

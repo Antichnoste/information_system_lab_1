@@ -45,17 +45,12 @@ Thumbs.db
 # Docker local overrides
 docker-compose.override.yml
 compose.override.yaml
-
-
-# Frontend dependencies and generated output
-frontend/node_modules/
-frontend/dist/
-frontend/test-results/
-frontend/playwright-report/
-
-frontend/*.tsbuildinfo
+compose.yaml
+Dockerfile
+.dockerignore
 
 src/test
 
 план.txt
 *.md
+README.md

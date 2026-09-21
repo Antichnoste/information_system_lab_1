@@ -29,9 +29,4 @@ public class CarRepository {
     public void delete(Car car) {
         em.remove(car);
     }
-
-    // Записать новые ссылки до удаления старого объекта, не завершая транзакцию.
-    public void flush() {
-        em.flush();
-    }
 }

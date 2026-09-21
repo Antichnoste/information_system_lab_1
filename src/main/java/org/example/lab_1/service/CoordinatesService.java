@@ -51,7 +51,6 @@ public class CoordinatesService {
         return mapper.toResponse(coordinates);
     }
 
-    // При удалении используемых координат переносим ссылки на выбранную замену.
     public void delete(long id, Long replacementId) {
         Coordinates coordinates = coordinatesRepository.findById(id);
         if (replacementId != null && replacementId == id) {
@@ -70,7 +69,6 @@ public class CoordinatesService {
         for (HumanBeing human : humans) {
             human.coordinates = replacement;
         }
-        coordinatesRepository.flush();
         coordinatesRepository.delete(coordinates);
     }
 }

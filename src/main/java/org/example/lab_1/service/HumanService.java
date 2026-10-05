@@ -6,7 +6,6 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import org.example.lab_1.model.HumanBeing;
 import org.example.lab_1.dto.HumanRequest;
@@ -30,8 +29,8 @@ public class HumanService {
     HumanMapper mapper;
 
     public HumanPageResponse list(int page, int size, String sort, String direction, Map<String, String> filters) {
-        if (page < 0 || size < 1 || size > 100) {
-            throw new WebApplicationException(GlobalExceptionHandler.response(400, "Номер страницы должен быть от 0, размер — от 1 до 100"));
+        if (page < 0 || size < 1 || size > 100 || (long) page * size > Integer.MAX_VALUE) {
+            throw new WebApplicationException(GlobalExceptionHandler.response(400, "Номер страницы должен быть от 0, размер — от 1 до 100, смещение — не больше 2147483647"));
         }
         if (sort == null || !List.of("id", "name", "soundtrackName", "carName", "carColor", "mood", "weaponType").contains(sort)) {
             throw new WebApplicationException(GlobalExceptionHandler.response(400, "Недопустимое поле сортировки"));
@@ -41,68 +40,14 @@ public class HumanService {
             throw new WebApplicationException(GlobalExceptionHandler.response(400, "Направление сортировки: asc или desc"));
         }
 
-        List<HumanBeing> humans = new ArrayList<>();
-        for (HumanBeing human : humanRepository.findAll()) {
-            if (matches(human, filters)) {
-                humans.add(human);
-            }
-        }
-
-        humans.sort((first, second) -> compareHumans(first, second, sort, direction));
-
-        int from = (int) Math.min((long) page * size, humans.size());
-        int to = Math.min(from + size, humans.size());
-        
+        long total = humanRepository.count(filters);
         List<HumanResponse> result = new ArrayList<>();
-        for (int i = from; i < to; i++) {
-            result.add(mapper.toResponse(humans.get(i)));
-        }
-        return new HumanPageResponse(result, humans.size(), page, size);
-    }
-
-    private int compareHumans(HumanBeing first, HumanBeing second, String sort, String direction) {
-        int result;
-        if ("id".equals(sort)) {
-            result = Integer.compare(first.id, second.id);
-        } else {
-            result = text(first, sort).compareToIgnoreCase(text(second, sort));
-        }
-
-        if ("desc".equals(direction)) {
-            result = -result;
-        }
-
-        if (result == 0) {
-            return Integer.compare(first.id, second.id);
-        }
-        return result;
-    }
-
-    private boolean matches(HumanBeing human, Map<String, String> filters) {
-        for (var filter : filters.entrySet()) {
-            String value = filter.getValue();
-            if (value == null || value.isEmpty()) {
-                continue;
-            }
-            String actual = text(human, filter.getKey()).toLowerCase(Locale.ROOT);
-            if (!actual.contains(value.toLowerCase(Locale.ROOT))) {
-                return false;
+        if ((long) page * size < total) {
+            for (HumanBeing human : humanRepository.findPage(filters, sort, direction, page, size)) {
+                result.add(mapper.toResponse(human));
             }
         }
-        return true;
-    }
-
-    private String text(HumanBeing human, String column) {
-        String value = switch (column) {
-            case "name" -> human.name;
-            case "soundtrackName" -> human.soundtrackName;
-            case "carName" -> human.car == null ? null : human.car.name;
-            case "carColor" -> human.car == null ? null : human.car.color;
-            case "mood" -> human.mood == null ? null : human.mood.name();
-            case "weaponType" -> human.weaponType.name();
-            default -> throw new WebApplicationException(GlobalExceptionHandler.response(400, "Недопустимое строковое поле"));
-        };
-        return value == null ? "" : value;
+        return new HumanPageResponse(result, total, page, size);
     }
 
     public HumanResponse get(int id) {

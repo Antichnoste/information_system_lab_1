@@ -13,7 +13,7 @@ public class CarRepository {
     EntityManager em;
 
     public List<Car> findAll() {
-        return em.createQuery("select e from Car e order by e.id", Car.class)
+        return em.createQuery("SELECT e FROM Car e ORDER BY e.id", Car.class)
                 .getResultList();
     }
 
@@ -21,6 +21,14 @@ public class CarRepository {
         Car car = em.find(Car.class, id);
         if (car == null) throw new WebApplicationException(GlobalExceptionHandler.response(404, "Автомобиль не найден"));
         return car;
+    }
+
+    public Car findFirstByNameAndColor(String name, String color) {
+        return em.createQuery("SELECT c FROM Car c WHERE c.name = :name AND c.color = :color ORDER BY c.id", Car.class)
+                .setParameter("name", name)
+                .setParameter("color", color)
+                .setMaxResults(1)
+                .getResultList().stream().findFirst().orElse(null);
     }
 
     public void save(Car car) {

@@ -39,7 +39,10 @@ public class CarController {
 
     @PUT
     @Path("{id}")
-    public CarResponse updateCar(@PathParam("id") long id, @NotNull(message = "Тело запроса обязательно") @Valid CarRequest input) {
+    public CarResponse updateCar( 
+            @PathParam("id") long id, 
+            @NotNull(message = "Тело запроса обязательно") @Valid CarRequest input) {
+
         return carService.update(id, input);
     }
 
@@ -48,6 +51,7 @@ public class CarController {
     public void deleteCar(
             @PathParam("id") long id,
             @QueryParam("replacementId") Long replacement) {
+
         carService.delete(id, replacement);
     }
 }

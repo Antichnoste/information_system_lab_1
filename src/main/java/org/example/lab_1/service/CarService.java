@@ -66,12 +66,7 @@ public class CarService {
         if (replacementId != null && replacementId == id) {
             throw new WebApplicationException(GlobalExceptionHandler.response(400, "Выберите другой автомобиль"));
         }
-        List<HumanBeing> humans = new ArrayList<>();
-        for (HumanBeing human : humanRepository.findAll()) {
-            if (human.car != null && human.car.id == id) {
-                humans.add(human);
-            }
-        }
+        List<HumanBeing> humans = humanRepository.findByCarId(id);
         if (!humans.isEmpty() && replacementId == null) {
             throw new WebApplicationException(GlobalExceptionHandler.response(409, "Автомобиль используется. Выберите замену."));
         }

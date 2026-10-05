@@ -14,7 +14,7 @@ public class AppUserRepository {
     public AppUser findByUsername(String username) {
         try {
             return em.createQuery(
-                    "select u from AppUser u where u.username = :username",
+                    "SELECT u FROM AppUser u WHERE u.username = :username",
                     AppUser.class
             )
             .setParameter("username", username)

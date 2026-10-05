@@ -13,7 +13,7 @@ public class CoordinatesRepository {
     EntityManager em;
 
     public List<Coordinates> findAll() {
-        return em.createQuery("select e from Coordinates e order by e.id", Coordinates.class)
+        return em.createQuery("SELECT e FROM Coordinates e ORDER BY e.id", Coordinates.class)
                 .getResultList();
     }
 

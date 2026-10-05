@@ -32,8 +32,7 @@ public class HumanController {
             @DefaultValue("asc") @QueryParam("direction") String direction,
             @Context UriInfo uri) {
         Map<String, String> filters = new HashMap<>();
-        for (String column : List.of(
-                "name", "soundtrackName", "carName", "carColor", "mood", "weaponType")) {
+        for (String column : List.of("name", "soundtrackName", "carName", "carColor", "mood", "weaponType")) {
             filters.put(column, uri.getQueryParameters().getFirst(column));
         }
         return humanService.list(page, size, sort, direction, filters);

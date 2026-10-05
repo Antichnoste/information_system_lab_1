@@ -6,7 +6,6 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import org.example.lab_1.model.Car;
 import org.example.lab_1.model.HumanBeing;
 import org.example.lab_1.model.Mood;
@@ -33,77 +32,50 @@ public class OperationsService {
             throw new WebApplicationException(GlobalExceptionHandler.response(400, "Укажите тип оружия"));
         }
 
-        for (HumanBeing human : humanRepository.findAll()) {
-            if (human.weaponType == weapon) {
-                humanRepository.delete(human);
-                return new OperationResponse(1, human.id);
-            }
+        HumanBeing human = humanRepository.findFirstByWeapon(weapon);
+        if (human == null) {
+            return new OperationResponse(0, null);
         }
-        return new OperationResponse(0, null);
+        humanRepository.delete(human);
+        return new OperationResponse(1, human.id);
     }
 
     // Найти минимальное время ожидания, пропуская null.
     public HumanResponse minimumWaiting() {
-        HumanBeing minimum = null;
-        for (HumanBeing human : humanRepository.findAll()) {
-            if (human.minutesOfWaiting == null) {
-                continue;
-            }
-
-            if (minimum == null || human.minutesOfWaiting < minimum.minutesOfWaiting) {
-                minimum = human;
-            }
-        }
+        HumanBeing minimum = humanRepository.findMinimumWaiting();
         return minimum == null ? null : mapper.toResponse(minimum);
     }
 
-    // Поиск обычной подстроки без SQL-шаблонов и без учёта регистра.
+    // Поиск обычной подстроки без учёта регистра.
     public List<HumanResponse> soundtrack(String substring) {
         if (substring == null) {
             throw new WebApplicationException(GlobalExceptionHandler.response(400, "Укажите подстроку"));
         }
 
-        String search = substring.toLowerCase(Locale.ROOT);
         List<HumanResponse> result = new ArrayList<>();
-        for (HumanBeing human : humanRepository.findAll()) {
-            if (human.soundtrackName.toLowerCase(Locale.ROOT).contains(search)) {
-                result.add(mapper.toResponse(human));
-            }
+        for (HumanBeing human : humanRepository.findBySoundtrack(substring)) {
+            result.add(mapper.toResponse(human));
         }
         return result;
     }
 
-    // Максимально печальное настроение только для realHero = true.
+    // Максимально печальное настроение для realHero = true.
     public OperationResponse sadden() {
-        int count = 0;
-        for (HumanBeing human : humanRepository.findAll()) {
-            if (human.realHero && human.mood != Mood.SORROW) {
-                human.mood = Mood.SORROW;
-                count++;
-            }
+        List<HumanBeing> humans = humanRepository.findHeroesToSadden();
+        for (HumanBeing human : humans) {
+            human.mood = Mood.SORROW;
         }
-        return new OperationResponse(count, null);
+        return new OperationResponse(humans.size(), null);
     }
 
     // Назначить одну общую красную Lada Kalina героям без машины.
     public OperationResponse giveCars() {
-        List<HumanBeing> humansWithoutCar = new ArrayList<>();
-        for (HumanBeing human : humanRepository.findAll()) {
-            if (human.realHero && human.car == null) {
-                humansWithoutCar.add(human);
-            }
-        }
+        List<HumanBeing> humansWithoutCar = humanRepository.findHeroesWithoutCar();
         if (humansWithoutCar.isEmpty()){
             return new OperationResponse(0, null);
         }
 
-        Car kalina = null;
-        for (Car car : carRepository.findAll()) {
-            if ("Lada Kalina".equals(car.name) && "RED".equals(car.color)) {
-                kalina = car;
-                break;
-            }
-        }
+        Car kalina = carRepository.findFirstByNameAndColor("Lada Kalina", "RED");
         if (kalina == null) {
             kalina = new Car();
             kalina.name = "Lada Kalina";

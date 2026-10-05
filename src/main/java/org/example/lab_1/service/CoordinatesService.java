@@ -50,8 +50,7 @@ public class CoordinatesService {
             throw new WebApplicationException(GlobalExceptionHandler.response(400, "Укажите версию объекта"));
         }
         if (!input.getVersion().equals(coordinates.version)) {
-            throw new WebApplicationException(GlobalExceptionHandler.response(409,
-                    "Объект уже изменён другим пользователем. Закройте форму и откройте её заново."));
+            throw new WebApplicationException(GlobalExceptionHandler.response(409, "Объект уже изменён другим пользователем. Закройте форму и откройте её заново."));
         }
         coordinates.x = input.getX();
         coordinates.y = input.getY();
@@ -64,12 +63,7 @@ public class CoordinatesService {
         if (replacementId != null && replacementId == id) {
             throw new WebApplicationException(GlobalExceptionHandler.response(400, "Выберите другие координаты"));
         }
-        List<HumanBeing> humans = new ArrayList<>();
-        for (HumanBeing human : humanRepository.findAll()) {
-            if (human.coordinates != null && human.coordinates.id == id) {
-                humans.add(human);
-            }
-        }
+        List<HumanBeing> humans = humanRepository.findByCoordinatesId(id);
         if (!humans.isEmpty() && replacementId == null) {
             throw new WebApplicationException(GlobalExceptionHandler.response(409, "Координаты используются. Выберите замену."));
         }

@@ -1,9 +1,9 @@
 package org.example.lab_1.service;
+import org.example.lab_1.exception.GlobalExceptionHandler;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.WebApplicationException;
 import java.util.ArrayList;
 import java.util.List;
 import org.example.lab_1.model.Coordinates;
@@ -54,7 +54,7 @@ public class CoordinatesService {
     public void delete(long id, Long replacementId) {
         Coordinates coordinates = coordinatesRepository.findById(id);
         if (replacementId != null && replacementId == id) {
-            throw new BadRequestException("Выберите другие координаты");
+            throw new WebApplicationException(GlobalExceptionHandler.response(400, "Выберите другие координаты"));
         }
         List<HumanBeing> humans = new ArrayList<>();
         for (HumanBeing human : humanRepository.findAll()) {
@@ -63,7 +63,7 @@ public class CoordinatesService {
             }
         }
         if (!humans.isEmpty() && replacementId == null) {
-            throw new WebApplicationException("Координаты используются. Выберите замену.", 409);
+            throw new WebApplicationException(GlobalExceptionHandler.response(409, "Координаты используются. Выберите замену."));
         }
         Coordinates replacement = replacementId == null ? null : coordinatesRepository.findById(replacementId);
         for (HumanBeing human : humans) {

@@ -27,7 +27,7 @@ public class OperationsController {
     @GET
     @Path("minimum-waiting")
     public Response minimum() {
-        var result = operationsService.minimumWaiting();
+        HumanResponse result = operationsService.minimumWaiting();
         return result == null
                 ? Response.noContent().build()
                 : Response.ok(result).build();

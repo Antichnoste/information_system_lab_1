@@ -164,7 +164,16 @@ async function api(path, method = 'GET', body) {
   }
   if (!response.ok) {
     if (response.status === 401 && user) showLogin('Сессия завершена. Войдите снова.');
-    const error = new Error(`Не удалось выполнить запрос (${response.status}).`);
+    let message = `Не удалось выполнить запрос (${response.status}).`;
+    try {
+      const data = await response.json();
+      if (typeof data?.message === 'string' && data.message.trim()) {
+        message = data.message;
+      }
+    } catch {
+      // Пустой ответ, HTML и обычный текст заменяем общим сообщением.
+    }
+    const error = new Error(message);
     error.status = response.status;
     throw error;
   }
@@ -318,7 +327,6 @@ async function refresh() {
     }
     await refreshDetails();
     $('#sync-error').textContent = '';
-    $('#updated').textContent = `Обновлено: ${new Date().toLocaleTimeString('ru-RU')}.`;
   } catch (error) {
     if (user) showError($('#sync-error'), error);
   } finally {

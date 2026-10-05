@@ -1,8 +1,9 @@
 package org.example.lab_1.repository;
+import org.example.lab_1.exception.GlobalExceptionHandler;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.ws.rs.NotFoundException;
 import java.util.List;
 import org.example.lab_1.model.Car;
 
@@ -18,7 +19,7 @@ public class CarRepository {
 
     public Car findById(long id) {
         Car car = em.find(Car.class, id);
-        if (car == null) throw new NotFoundException("Автомобиль не найден");
+        if (car == null) throw new WebApplicationException(GlobalExceptionHandler.response(404, "Автомобиль не найден"));
         return car;
     }
 

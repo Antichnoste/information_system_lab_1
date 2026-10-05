@@ -1,8 +1,9 @@
 package org.example.lab_1.repository;
+import org.example.lab_1.exception.GlobalExceptionHandler;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.ws.rs.NotFoundException;
 import java.util.List;
 import org.example.lab_1.model.HumanBeing;
 
@@ -19,7 +20,7 @@ public class HumanRepository {
     public HumanBeing findById(int id) {
         HumanBeing human = em.find(HumanBeing.class, id);
         if (human == null) {
-            throw new NotFoundException("Персонаж не найден");
+            throw new WebApplicationException(GlobalExceptionHandler.response(404, "Персонаж не найден"));
         }
         return human;
     }

@@ -1,8 +1,9 @@
 package org.example.lab_1.service;
+import org.example.lab_1.exception.GlobalExceptionHandler;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.BadRequestException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -29,7 +30,7 @@ public class OperationsService {
     // Удалить первого найденного персонажа с заданным оружием.
     public OperationResponse deleteByWeapon(WeaponType weapon) {
         if (weapon == null) {
-            throw new BadRequestException("Укажите тип оружия");
+            throw new WebApplicationException(GlobalExceptionHandler.response(400, "Укажите тип оружия"));
         }
 
         for (HumanBeing human : humanRepository.findAll()) {
@@ -59,7 +60,7 @@ public class OperationsService {
     // Поиск обычной подстроки без SQL-шаблонов и без учёта регистра.
     public List<HumanResponse> soundtrack(String substring) {
         if (substring == null) {
-            throw new BadRequestException("Укажите подстроку");
+            throw new WebApplicationException(GlobalExceptionHandler.response(400, "Укажите подстроку"));
         }
 
         String search = substring.toLowerCase(Locale.ROOT);

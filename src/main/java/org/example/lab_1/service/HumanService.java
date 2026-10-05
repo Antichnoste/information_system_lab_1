@@ -1,8 +1,9 @@
 package org.example.lab_1.service;
+import org.example.lab_1.exception.GlobalExceptionHandler;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.ws.rs.BadRequestException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -30,14 +31,14 @@ public class HumanService {
 
     public HumanPageResponse list(int page, int size, String sort, String direction, Map<String, String> filters) {
         if (page < 0 || size < 1 || size > 100) {
-            throw new BadRequestException("Номер страницы должен быть от 0, размер — от 1 до 100");
+            throw new WebApplicationException(GlobalExceptionHandler.response(400, "Номер страницы должен быть от 0, размер — от 1 до 100"));
         }
         if (sort == null || !List.of("id", "name", "soundtrackName", "carName", "carColor", "mood", "weaponType").contains(sort)) {
-            throw new BadRequestException("Недопустимое поле сортировки");
+            throw new WebApplicationException(GlobalExceptionHandler.response(400, "Недопустимое поле сортировки"));
         }
 
         if (!"asc".equals(direction) && !"desc".equals(direction)) {
-            throw new BadRequestException("Направление сортировки: asc или desc");
+            throw new WebApplicationException(GlobalExceptionHandler.response(400, "Направление сортировки: asc или desc"));
         }
 
         List<HumanBeing> humans = new ArrayList<>();
@@ -99,7 +100,7 @@ public class HumanService {
             case "carColor" -> human.car == null ? null : human.car.color;
             case "mood" -> human.mood == null ? null : human.mood.name();
             case "weaponType" -> human.weaponType.name();
-            default -> throw new BadRequestException("Недопустимое строковое поле");
+            default -> throw new WebApplicationException(GlobalExceptionHandler.response(400, "Недопустимое строковое поле"));
         };
         return value == null ? "" : value;
     }

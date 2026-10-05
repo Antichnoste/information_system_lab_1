@@ -1,8 +1,9 @@
 package org.example.lab_1.repository;
+import org.example.lab_1.exception.GlobalExceptionHandler;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.ws.rs.NotFoundException;
 import java.util.List;
 import org.example.lab_1.model.Coordinates;
 
@@ -19,7 +20,7 @@ public class CoordinatesRepository {
     public Coordinates findById(long id) {
         Coordinates coordinates = em.find(Coordinates.class, id);
         if (coordinates == null) {
-            throw new NotFoundException("Координаты не найдены");
+            throw new WebApplicationException(GlobalExceptionHandler.response(404, "Координаты не найдены"));
         }
         return coordinates;
     }

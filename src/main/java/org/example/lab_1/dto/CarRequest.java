@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 @Setter
 @NoArgsConstructor
 public class CarRequest {
+    private Long version;
+
     private String name;
     @NotNull(message = "Укажите, крутой ли автомобиль")
     private Boolean cool;

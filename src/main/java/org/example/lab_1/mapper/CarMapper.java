@@ -9,6 +9,6 @@ public class CarMapper {
         if (car == null) {
             return null;
         }
-        return new CarResponse(car.id, car.name, car.cool, car.color);
+        return new CarResponse(car.version, car.id, car.name, car.cool, car.color);
     }
 }

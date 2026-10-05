@@ -11,6 +11,8 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HumanResponse {
+    private Long version;
+
     private Integer id;
     private String name;
     private CoordinatesResponse coordinates;

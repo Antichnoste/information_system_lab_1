@@ -27,6 +27,10 @@ public class CarRepository {
         em.persist(car);
     }
 
+    public void flush() {
+        em.flush();
+    }
+
     public void delete(Car car) {
         em.remove(car);
     }

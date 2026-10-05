@@ -6,6 +6,10 @@ import org.hibernate.annotations.Check;
 @Table(name="coordinates")
 @Check(constraints = "y > -629 and y < 'Infinity'::real")
 public class Coordinates {
+    @Version
+    @Column(nullable = false)
+    public Long version;
+    
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     public Long id;

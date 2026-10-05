@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @Setter
 @NoArgsConstructor
 public class CoordinatesRequest {
+    private Long version;
+
     @NotNull(message = "Укажите координату x")
     private Long x;
     @NotNull(message = "Укажите координату y")

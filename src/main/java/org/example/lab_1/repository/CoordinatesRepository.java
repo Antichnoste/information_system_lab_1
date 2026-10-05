@@ -29,6 +29,11 @@ public class CoordinatesRepository {
         em.persist(coordinates);
     }
 
+    // Обновляем версию до формирования ответа клиенту.
+    public void flush() {
+        em.flush();
+    }
+
     public void delete(Coordinates coordinates) {
         em.remove(coordinates);
     }

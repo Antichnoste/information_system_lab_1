@@ -13,6 +13,7 @@ public class HumanMapper {
 
     public HumanResponse toResponse(HumanBeing human) {
         return new HumanResponse(
+                human.version,
                 human.id,
                 human.name,
                 coordinatesMapper.toResponse(human.coordinates),

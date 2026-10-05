@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @Setter
 @NoArgsConstructor
 public class HumanRequest {
+    private Long version;
+
     @NotEmpty(message = "Имя не должно быть пустым")
     private String name;
 

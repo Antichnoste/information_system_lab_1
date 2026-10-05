@@ -29,6 +29,10 @@ public class HumanRepository {
         em.persist(human);
     }
 
+    public void flush() {
+        em.flush();
+    }
+
     public void delete(HumanBeing human) {
         em.remove(human);
     }

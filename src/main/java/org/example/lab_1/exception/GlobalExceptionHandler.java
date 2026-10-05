@@ -1,5 +1,6 @@
 package org.example.lab_1.exception;
 
+import jakarta.persistence.OptimisticLockException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ElementKind;
@@ -27,6 +28,10 @@ public class GlobalExceptionHandler implements ExceptionMapper<Exception> {
     @Override
     public Response toResponse(Exception exception) {
         for (Throwable cause = exception; cause != null; cause = cause.getCause()) {
+
+            if (cause instanceof OptimisticLockException) {
+                return response(409, "Объект уже изменён или удалён другим пользователем. Закройте форму и откройте её заново.");
+            }
 
             if (cause instanceof ConstraintViolationException error) {
                 List<String> messages = new ArrayList<>();

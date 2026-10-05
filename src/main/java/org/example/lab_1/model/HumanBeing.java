@@ -7,6 +7,9 @@ import org.hibernate.annotations.Check;
 @Table(name="human_being")
 @Check(constraints = "id > 0 and name <> ''")
 public class HumanBeing {
+    @Version
+    @Column(nullable = false)
+    public Long version;
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)

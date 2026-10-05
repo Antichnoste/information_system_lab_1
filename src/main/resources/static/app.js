@@ -28,6 +28,7 @@ let filters = new URLSearchParams(new FormData($('#human-filters')));
 let cars = [];
 let coordinates = [];
 let humanId = null;
+let humanVersion = null;
 let reference = null;
 let details = null;
 let deletion = null;
@@ -170,9 +171,7 @@ async function api(path, method = 'GET', body) {
       if (typeof data?.message === 'string' && data.message.trim()) {
         message = data.message;
       }
-    } catch {
-      // Пустой ответ, HTML и обычный текст заменяем общим сообщением.
-    }
+    } catch {}
     const error = new Error(message);
     error.status = response.status;
     throw error;
@@ -384,6 +383,7 @@ async function openEditor(kind, id = null) {
   if (kind === 'humans') {
     await loadReferences();
     humanId = id;
+    humanVersion = item?.version ?? null;
     resetForm(humanForm);
     refreshSelects();
     if (item) {
@@ -405,7 +405,7 @@ async function openEditor(kind, id = null) {
     $('#human-title').textContent = id === null ? 'Новый персонаж' : `Изменить персонажа № ${id}`;
     $('#human-dialog').showModal();
   } else {
-    reference = { kind, id };
+    reference = { kind, id, version: item?.version ?? null };
     resetForm(referenceForm);
     $('#car-fields').hidden = kind !== 'cars';
     $('#car-fields').disabled = kind !== 'cars';
@@ -518,6 +518,7 @@ humanForm.addEventListener('submit', (event) => {
       if (fields.carId.value && !cars.some((item) => String(item.id) === fields.carId.value))
         throw new Error('Выберите существующий автомобиль или «Нет автомобиля».');
       const body = {
+        version: humanVersion,
         name: fields.name.value,
         coordinatesId: fields.coordinatesId.value,
         realHero: fields.realHero.value === 'true',
@@ -557,6 +558,7 @@ referenceForm.addEventListener('submit', (event) => {
               cool: fields.cool.checked,
             }
           : { x: longValue(fields.x), y: Number(fields.y.value) };
+      body.version = reference.version;
       const saved = await api(
         id === null ? kind : `${kind}/${id}`,
         id === null ? 'POST' : 'PUT',

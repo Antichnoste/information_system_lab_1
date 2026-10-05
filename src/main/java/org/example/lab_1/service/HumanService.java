@@ -118,7 +118,15 @@ public class HumanService {
 
     public HumanResponse update(int id, HumanRequest input) {
         HumanBeing human = humanRepository.findById(id);
+        if (input.getVersion() == null) {
+            throw new WebApplicationException(GlobalExceptionHandler.response(400, "Укажите версию объекта"));
+        }
+        if (!input.getVersion().equals(human.version)) {
+            throw new WebApplicationException(GlobalExceptionHandler.response(409,
+                    "Объект уже изменён другим пользователем. Закройте форму и откройте её заново."));
+        }
         fill(human, input);
+        humanRepository.flush();
         return mapper.toResponse(human);
     }
 

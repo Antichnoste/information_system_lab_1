@@ -46,8 +46,16 @@ public class CoordinatesService {
 
     public CoordinatesResponse update(long id, CoordinatesRequest input) {
         Coordinates coordinates = coordinatesRepository.findById(id);
+        if (input.getVersion() == null) {
+            throw new WebApplicationException(GlobalExceptionHandler.response(400, "Укажите версию объекта"));
+        }
+        if (!input.getVersion().equals(coordinates.version)) {
+            throw new WebApplicationException(GlobalExceptionHandler.response(409,
+                    "Объект уже изменён другим пользователем. Закройте форму и откройте её заново."));
+        }
         coordinates.x = input.getX();
         coordinates.y = input.getY();
+        coordinatesRepository.flush();
         return mapper.toResponse(coordinates);
     }
 

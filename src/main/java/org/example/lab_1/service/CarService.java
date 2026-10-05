@@ -47,9 +47,17 @@ public class CarService {
 
     public CarResponse update(long id, CarRequest input) {
         Car car = carRepository.findById(id);
+        if (input.getVersion() == null) {
+            throw new WebApplicationException(GlobalExceptionHandler.response(400, "Укажите версию объекта"));
+        }
+        if (!input.getVersion().equals(car.version)) {
+            throw new WebApplicationException(GlobalExceptionHandler.response(409,
+                    "Объект уже изменён другим пользователем. Закройте форму и откройте её заново."));
+        }
         car.name = input.getName();
         car.cool = input.getCool();
         car.color = input.getColor();
+        carRepository.flush();
         return mapper.toResponse(car);
     }
 

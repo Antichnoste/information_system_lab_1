@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CoordinatesResponse {
+    private Long version;
+
     private Long id;
     private String x;
     private Float y;

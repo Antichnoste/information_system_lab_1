@@ -3,6 +3,10 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "car")
 public class Car {
+    @Version
+    @Column(nullable = false)
+    public Long version;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;

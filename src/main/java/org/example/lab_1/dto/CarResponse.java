@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CarResponse {
+    private Long version;
+
     private Long id;
     private String name;
     private boolean cool;
